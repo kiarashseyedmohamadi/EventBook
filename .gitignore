@@ -19,9 +19,6 @@ db.sqlite3
 media/
 staticfiles/
 
-# Migrations (optional: اگه می‌خوای فقط کد migration نمونه، اینو پاک کن)
-*/migrations/__pycache__/
-*/migrations/*.py
 
 # VSCode / PyCharm / IDE stuff
 .vscode/
