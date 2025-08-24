@@ -231,9 +231,9 @@ class BookingView(APIView):
             return Response({'message':'تعداد رزرو باید بزرگتر از صفر باشد'}, status=400)
 
         try:
-            event = Event.objects.select_for_update().get(id=event_id)
             
             with transaction.atomic():
+                event = Event.objects.select_for_update().get(id=event_id)
                 if event.seats_left < ticket_count:
                     return Response({'message':'ظرفیت کافی وجود ندارد'}, status=400)
 
@@ -268,7 +268,6 @@ class PaymentView(APIView):
     
     permission_classes = [IsAuthenticated] 
     
-    
     def get(self,request,pk):
         try:
             booking=Booking.objects.get(id=pk)
@@ -279,7 +278,6 @@ class PaymentView(APIView):
             return Response({'message': 'رزرو پیدا نشد'}, status=404)
         except Payment.DoesNotExist:
             return Response({'message': 'پرداختی برای این رزرو وجود ندارد'}, status=404)
-    
     
         
     def post(self,request,pk):

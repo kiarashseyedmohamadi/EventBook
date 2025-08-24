@@ -10,8 +10,8 @@ class VenueSerializer(serializers.ModelSerializer):
 class EventSerializer(serializers.ModelSerializer):
     class Meta:
         model = Event
-        fields = ['title','organizer','venue','price','image']
-        read_only_fields = ['slug','status','seats_total','seats_left','start_at','end_at','create_at']
+        fields = ['title','organizer','venue','price','image','seats_total','seats_left']
+        read_only_fields = ['slug','status','start_at','end_at','create_at']
 
 class BookingSerializer(serializers.ModelSerializer):
     class Meta:
