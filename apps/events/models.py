@@ -78,4 +78,13 @@ class Payment(models.Model):
         verbose_name_plural= 'پرداخت ها'
         
 #-------------------------------------- 
+
+class Profile(models.Model):                             #این مدل برای امکان ارسال کد به ایمیل برای لاگین ایجاد شد
+    user = models.OneToOneField(User, on_delete=models.CASCADE)
+    verification_code = models.CharField(max_length=5,null=True,blank=True)
     
+    def __str__(self):
+        return f"{self.user.username} - {self.verification_code}"
+   
+#--------------------------------------  
+
