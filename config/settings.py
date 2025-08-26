@@ -154,3 +154,11 @@ SIMPLE_JWT = {
     "ACCESS_TOKEN_LIFETIME": timedelta(minutes=30),   # عمر access
     "REFRESH_TOKEN_LIFETIME": timedelta(days=7),     # عمر refresh
 }
+
+
+
+
+AUTHENTICATION_BACKENDS = [
+    'apps.events.backends.EmailBackend',
+    'django.contrib.auth.backends.ModelBackend',
+]
