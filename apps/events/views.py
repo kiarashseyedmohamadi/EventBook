@@ -1,12 +1,15 @@
 from django.shortcuts import render
 from rest_framework.views import APIView
 from rest_framework.response import Response
-from .models import Venue,Event,Booking,Payment,User
-from .serializers import VenueSerializer,EventSerializer,BookingSerializer,PaymentSerializer
+from .models import Venue,Event,Booking,Payment,User,Profile
+from .serializers import VenueSerializer,EventSerializer,BookingSerializer,PaymentSerializer,RegisterSerializer,LoginSerializer
 from rest_framework.permissions import IsAuthenticated
 from rest_framework.pagination import PageNumberPagination
 import uuid
 from django.db import transaction
+import random
+from django.core.mail import send_mail
+from django.conf import settings
 #================================================   
    
 class TestAPIView(APIView):
@@ -301,11 +304,124 @@ class PaymentView(APIView):
         return Response({'payment': serializer.data, 'message': 'پرداخت شبیه‌سازی شد و موفق بود'}, status=201)
 
         
+#================================================  
   
+class RegisterView(APIView):
+    
+    def get_permissions(self):
+        if self.request.method == 'POST':
+            return [] 
+        return [IsAuthenticated()] 
+    
+    
+    def get(self,request):
+        if not request.user.is_staff:
+             return Response({'message': 'شما اجازه دسترسی ندارید'}, status=403)
+
+        users=User.objects.all()
+        serializer=RegisterSerializer(users,many=True)
+        return Response({'data':serializer.data,'message': 'لیست کاربران با موفقیت واکشی شد'},status =200)
+
+#--------------- 
+ 
+    def post(self,request):
+        serializer=RegisterSerializer(data=request.data)
+        if serializer.is_valid():
+            username=serializer.validated_data['username']
+            password=serializer.validated_data['password']
+            email=serializer.validated_data['email']
+            user=User.objects.create_user(username=username,password=password,email=email)
+            Profile.objects.create(user=user)
+            return Response({'user':serializer.data,'message':'ثبت نام با موفقیت انجام شد'},status=201)
         
-          
+        return Response({'data':serializer.errors,'message':'اطلاعات ورودی صحیح نمی باشد'},status=400)
+            
+#---------------  
+
+    def put(self,request,pk):
+        user=User.objects.get(id=pk)
+        data=request.data
+        serializer=RegisterSerializer(user,data)
+        if serializer.is_valid():
+            serializer.save()
+            return Response({'data':serializer.data,'message':'به روز رسانی با موفقیت انجام شد'},status=201)
+        return Response({'data':serializer.errors,'message':'طلاعات ورودی صحیح نمی باشد'},status=400)
+    
+#---------------  
+
+    def patch(self,request,pk):
+        user=User.objects.get(id=pk)
+        data=request.data
+        serializer=RegisterSerializer(user,data,partial=True)
+        if serializer.is_valid():
+            serializer.save()
+            return Response({'data':serializer.data,'message':'به روز رسانی با موفقیت انجام شد'},status=201)
+        return Response({'data':serializer.errors,'message':'طلاعات ورودی صحیح نمی باشد'},status=400)
+    
+#---------------  
+    
+    def delete(self,request,pk):
+        try:
+            user=User.objects.get(id=pk)
+            user.delete()
+            return Response({'message':'کاربر با موفقیت حذف شد'},status=200)
+        except User.DoesNotExist:
+            return Response({'message':'کاربری با این مشخصات وجود ندارد!'},status=400)
+            
+            
+
+
+
+#================================================  
+
+class LoginView(APIView):
+    def post(self,request):
+        data=request.data
+        serializer = LoginSerializer(data=data)
+        if serializer.is_valid():
+            email = serializer.validated_data['email']
+            password = serializer.validated_data['password']
+            
+            try:
+                user = User.objects.get(email=email)  
+            except User.DoesNotExist:
+                return Response({'message': 'کاربر یافت نشد'}, status=404)
+            
+            
+            if user.check_password(password):
+                profile=Profile.objects.get(user=user)
+                code = str(random.randint(10000, 99999))
+                profile.verification_code = code
+                profile.save()
+
+                # ارسال ایمیل
+                send_mail('کد تایید ورود',f'کد تایید شما: {code}',settings.DEFAULT_FROM_EMAIL,[user.email],fail_silently=False,)
+                
+                
+                
+                return Response({'message': 'ورود موفق'}, status=200)
+           
+            return Response({'message': 'رمز عبور اشتباه است'}, status=400)
+        
+        return Response({'data': serializer.errors,'message':'اطلاعات ورودی نامعتیر می باشد'}, status=400)
+                
+                    
+                
+            
+                
+           
+        
+            
+            
+            
+    
+        
             
         
+        
+
+   
+          
         
         
     
