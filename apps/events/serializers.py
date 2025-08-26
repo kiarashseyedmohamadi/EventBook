@@ -1,5 +1,5 @@
 from rest_framework import serializers
-from .models import Venue,Event,Booking,Payment
+from .models import Venue,Event,Booking,Payment,User
 
 class VenueSerializer(serializers.ModelSerializer):
     class Meta:
@@ -23,3 +23,24 @@ class PaymentSerializer(serializers.ModelSerializer):
         model = Payment
         fields = ['booking','ref','status','created_at'] 
         read_only_fields = ['booking','ref','status','created_at']
+
+#================================================================================
+
+class RegisterSerializer(serializers.ModelSerializer):
+    password = serializers.CharField(write_only=True)
+    
+    class Meta:
+        model = User
+        fields = ("username", "email", "password")
+        
+
+#--------
+
+class LoginSerializer(serializers.Serializer):
+    email = serializers.EmailField()
+    password = serializers.CharField(write_only=True)
+    
+     
+
+     
+    
