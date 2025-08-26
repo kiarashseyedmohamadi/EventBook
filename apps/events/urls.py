@@ -5,7 +5,7 @@ from .import views
 app_name='events'
 
 urlpatterns = [
-     path('',views.TestAPIView.as_view(), name='register'),
+     path('',views.TestAPIView.as_view(), name='register1'),
      
      # Venue
      path('venues/', views.VenueView.as_view(), name='venue-list'),  
@@ -21,5 +21,10 @@ urlpatterns = [
 
      # Payment
      path('payments/<int:pk>/', views.PaymentView.as_view(), name='payment'),        # GET و POST
+     
+     path('register/',views.RegisterView.as_view(),name = 'register'),
+     path('register/<int:id>/', views.RegisterView.as_view(), name='register-detail'),
+     
+     path('login/',views.LoginView.as_view(), name ='login')
           
 ]
