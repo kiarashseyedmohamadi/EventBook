@@ -26,6 +26,8 @@ urlpatterns = [
      path('register/<int:id>/', views.RegisterView.as_view(), name='register-detail'),
      
      path('login/',views.LoginView.as_view(), name ='login'),
-     path('verify-code/',views.VerifyCodeView.as_view(), name ='verify-code')
+     path('verify-code/',views.VerifyCodeView.as_view(), name ='verify-code'),
+     
+     path('logout/',views.LogoutView.as_view(), name='logout'),
           
 ]

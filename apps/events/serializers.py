@@ -46,4 +46,7 @@ class LoginSerializer(serializers.Serializer):
 class VerifyCodeSerializer(serializers.Serializer):
     verification_code = serializers.CharField(max_length=5)
      
-    
+#--------  
+
+class LogoutSerializer(serializers.Serializer):
+    refresh = serializers.CharField()

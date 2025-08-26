@@ -2,7 +2,7 @@ from django.shortcuts import render
 from rest_framework.views import APIView
 from rest_framework.response import Response
 from .models import Venue,Event,Booking,Payment,User,Profile
-from .serializers import VenueSerializer,EventSerializer,BookingSerializer,PaymentSerializer,RegisterSerializer,LoginSerializer,VerifyCodeSerializer
+from .serializers import VenueSerializer,EventSerializer,BookingSerializer,PaymentSerializer,RegisterSerializer,LoginSerializer,VerifyCodeSerializer,LogoutSerializer
 from rest_framework.permissions import IsAuthenticated
 from rest_framework.pagination import PageNumberPagination
 import uuid
@@ -430,3 +430,21 @@ class VerifyCodeView(APIView):
                 return Response({'message': 'کد تایید نامعتبر است'}, status=400)
         
         return Response({'data': serializer.errors, 'message': 'اطلاعات ورودی نامعتبر می باشد'}, status=400)
+
+#---------------  
+
+class LogoutView(APIView):
+    permission_classes = [IsAuthenticated]
+
+    def post(self, request):
+        serializer = LogoutSerializer(data=request.data)
+        if serializer.is_valid():
+            try:
+                refresh_token = serializer.validated_data["refresh"]
+                token = RefreshToken(refresh_token)
+                token.blacklist()
+                return Response({"message": "خروج موفق"}, status=205)
+            except Exception:
+                return Response({"message": "توکن نامعتبر"}, status=400)
+        return Response({"data": serializer.errors, "message": "اطلاعات ورودی نامعتبر"}, status=400)
+
