@@ -1,10 +1,11 @@
 from django.contrib import admin
-from .models import Event, Booking, Payment, Venue
+from .models import Event, Booking, Payment, Venue , Profile
 
 
 admin.site.register(Booking)
 admin.site.register(Payment)
 admin.site.register(Venue)
+admin.site.register(Profile)
 
 
 
