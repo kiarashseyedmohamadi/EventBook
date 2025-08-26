@@ -2,7 +2,7 @@ from django.shortcuts import render
 from rest_framework.views import APIView
 from rest_framework.response import Response
 from .models import Venue,Event,Booking,Payment,User,Profile
-from .serializers import VenueSerializer,EventSerializer,BookingSerializer,PaymentSerializer,RegisterSerializer,LoginSerializer
+from .serializers import VenueSerializer,EventSerializer,BookingSerializer,PaymentSerializer,RegisterSerializer,LoginSerializer,VerifyCodeSerializer
 from rest_framework.permissions import IsAuthenticated
 from rest_framework.pagination import PageNumberPagination
 import uuid
@@ -10,6 +10,7 @@ from django.db import transaction
 import random
 from django.core.mail import send_mail
 from django.conf import settings
+from rest_framework_simplejwt.tokens import RefreshToken
 #================================================   
    
 class TestAPIView(APIView):
@@ -368,16 +369,14 @@ class RegisterView(APIView):
         except User.DoesNotExist:
             return Response({'message':'کاربری با این مشخصات وجود ندارد!'},status=400)
             
-            
-
-
 
 #================================================  
 
 class LoginView(APIView):
-    def post(self,request):
-        data=request.data
+    def post(self, request):
+        data = request.data
         serializer = LoginSerializer(data=data)
+        
         if serializer.is_valid():
             email = serializer.validated_data['email']
             password = serializer.validated_data['password']
@@ -387,9 +386,8 @@ class LoginView(APIView):
             except User.DoesNotExist:
                 return Response({'message': 'کاربر یافت نشد'}, status=404)
             
-            
             if user.check_password(password):
-                profile=Profile.objects.get(user=user)
+                profile = Profile.objects.get(user=user)
                 code = str(random.randint(10000, 99999))
                 profile.verification_code = code
                 profile.save()
@@ -397,34 +395,38 @@ class LoginView(APIView):
                 # ارسال ایمیل
                 send_mail('کد تایید ورود',f'کد تایید شما: {code}',settings.DEFAULT_FROM_EMAIL,[user.email],fail_silently=False,)
                 
-                
-                
-                return Response({'message': 'ورود موفق'}, status=200)
+                return Response({'message': 'کد تایید به ایمیل شما ارسال شد','requires_verification': True}, status=200)
            
             return Response({'message': 'رمز عبور اشتباه است'}, status=400)
         
-        return Response({'data': serializer.errors,'message':'اطلاعات ورودی نامعتیر می باشد'}, status=400)
-                
-                    
-                
-            
-                
-           
-        
-            
-            
-            
+        return Response({'data': serializer.errors,'message': 'اطلاعات ورودی نامعتبر می باشد'}, status=400)
     
-        
-            
-        
-        
+#---------------     
 
-   
-          
+class VerifyCodeView(APIView):
+    def post(self, request):
+        data = request.data
+        serializer = VerifyCodeSerializer(data=data)
+        if serializer.is_valid():
+            code = serializer.validated_data['verification_code']
+            
+            try:
+                profile = Profile.objects.get(verification_code=code)
+                
+                # تولید توکن JWT
+                token = RefreshToken.for_user(profile.user)
+                
+                # پاک کردن کد بعد از استفاده موفق
+                profile.verification_code = None
+                profile.save()
+                
+                return Response({
+                    'message': 'ورود موفق',
+                    'refresh': str(token),
+                    'access': str(token.access_token)
+                }, status=200)
+            
+            except Profile.DoesNotExist:
+                return Response({'message': 'کد تایید نامعتبر است'}, status=400)
         
-        
-    
-  
-    
- 
+        return Response({'data': serializer.errors, 'message': 'اطلاعات ورودی نامعتبر می باشد'}, status=400)

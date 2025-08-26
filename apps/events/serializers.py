@@ -39,8 +39,11 @@ class RegisterSerializer(serializers.ModelSerializer):
 class LoginSerializer(serializers.Serializer):
     email = serializers.EmailField()
     password = serializers.CharField(write_only=True)
-    
-     
 
+
+#--------  
+
+class VerifyCodeSerializer(serializers.Serializer):
+    verification_code = serializers.CharField(max_length=5)
      
     
