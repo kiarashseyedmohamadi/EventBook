@@ -1,6 +1,7 @@
 from django.db import models
 from django.contrib.auth.models import User
-
+from django.utils import timezone
+from datetime import timedelta
 #--------------------------------------
 
 def upload_image_venue(instance,filename):
@@ -13,13 +14,14 @@ class Venue(models.Model):
     slug = models.SlugField(unique=True)
     image = models.ImageField(upload_to = upload_image_venue,verbose_name=' تصویر رویداد',null=True,blank=True)
         
+        
     def __str__(self):
         return self.venue_title
 
 
     class Meta:
         verbose_name= 'محل برگزاری'
-        verbose_name_plural= 'محل های محل برگزاری ها'
+        verbose_name_plural= 'محل های برگزاری'
         
 #--------------------------------------
 
@@ -31,12 +33,12 @@ class Event(models.Model):
     
     title = models.CharField(max_length = 255)
     organizer = models.ForeignKey(User, on_delete=models.CASCADE,verbose_name="سازنده رویداد")
-    status = models.CharField(max_length=20, choices=STATUS_CHOICES)
+    status = models.CharField(max_length=20, choices=STATUS_CHOICES, default='ongoing')
     venue = models.ForeignKey(Venue,on_delete=models.CASCADE,verbose_name=' محل برگزاری')
     seats_total = models.PositiveIntegerField()
     seats_left = models.PositiveIntegerField()
-    start_at = models.DateTimeField()
-    end_at = models.DateTimeField()
+    start_at = models.DateTimeField(default=timezone.now)
+    end_at = models.DateTimeField(default=timezone.now)
     create_at = models.DateTimeField(auto_now_add=True,verbose_name='تاریخ ایجاد ')
     price = models.DecimalField(max_digits=10, decimal_places=2, verbose_name="مبلغ")
     slug = models.SlugField(unique=True)

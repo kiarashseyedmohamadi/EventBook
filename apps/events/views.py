@@ -30,25 +30,15 @@ class VenueView(APIView):
     
     def get(self,request):
         queryset = Venue.objects.all()
-        status = request.query_params.get('status')
-        venue = request.query_params.get('venue')
-        min_date = request.query_params.get('min_date')
-        max_date = request.query_params.get('max_date')
-        min_price = request.query_params.get('min_price')
-        max_price = request.query_params.get('max_price')
 
-        if status:
-            queryset = queryset.filter(status=status)
-        if venue:
-            queryset = queryset.filter(venue_id=venue)  
-        if min_date:
-            queryset = queryset.filter(start_at__gte=min_date)
-        if max_date:
-            queryset = queryset.filter(end_at__lte=max_date)
-        if min_price:
-            queryset = queryset.filter(price__gte=min_price)
-        if max_price:
-            queryset = queryset.filter(price__lte=max_price)
+        venue_title = request.query_params.get('venue_title')
+        address= request.query_params.get('address')
+
+        if venue_title:
+            queryset = queryset.filter(venue_title=venue_title)
+        if  address:
+            queryset = queryset.filter(address= address)  
+      
             
         paginator = VenuePagination()
         result_page = paginator.paginate_queryset(queryset,request)
