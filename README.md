@@ -7,3 +7,4 @@
 1. کلون کردن پروژه:
 ```bash
 git clone https://github.com/kiarashseyedmohamadi/EventBook.git
+cd EventBook
