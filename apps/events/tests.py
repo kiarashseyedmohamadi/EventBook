@@ -1,8 +1,9 @@
 from django.test import TestCase
 from rest_framework.test import APIClient
 from django.urls import reverse
-from .models import Venue,User,Event,Booking
-
+from .models import Venue, User, Event, Booking, Payment, Profile
+from rest_framework_simplejwt.tokens import RefreshToken
+from django.core import mail
 #-----------    
 
 class VenueViewTest(TestCase):
